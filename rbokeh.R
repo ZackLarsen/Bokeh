@@ -1,8 +1,8 @@
 #https://hafen.github.io/rbokeh/#preview
 
 
-
-library(rbokeh)
+library(pacman)
+p_load(rbokeh,ggplot2,dplyr,tidyverse)
 
 
 
@@ -123,6 +123,84 @@ orstationc <- read.csv("http://geog.uoregon.edu/bartlein/old_courses/geog414s05/
 gmap(lat = 44.1, lng = -120.767, zoom = 6, width = 700, height = 600) %>%
   ly_points(lon, lat, data = orstationc, alpha = 0.8, col = "red",
             hover = c(station, Name, elev, tann))
+
+
+
+
+
+
+
+
+# Chicago CTA stations plotted
+library(pacman)
+p_load(dplyr, tidyverse, lubridate, stringr,jsonlite)
+
+cta <- fromJSON("https://data.cityofchicago.org/resource/mh5w-x5kh.json")
+cta %>% 
+  head()
+cta$date <- as.Date(cta$date)
+cta$rides <- as.integer(cta$rides)
+cta$station_id <- as.integer(cta$station_id)
+sapply(cta,class)
+cta %>% 
+  head()
+
+# https://data.cityofchicago.org/Transportation/CTA-System-Information-List-of-L-Stops/8pix-ypme/data
+stations <- read.csv("CTA_-_System_Information_-_List_of__L__Stops.csv")
+stations %>% 
+  head()
+sapply(stations, class)
+stations$MAP_ID <- as.integer(stations$MAP_ID)
+sapply(stations, class)
+
+# Bind the two datasets together:
+all <- stations %>% 
+  left_join(cta, by = c("MAP_ID" = "station_id"))
+all %>% 
+  head()
+
+# Bind the stations to their respective lat/lon values:
+stations_locations <- stations %>% 
+  inner_join(cta, by=c("MAP_ID"="station_id"))
+
+# Split the location string into two vectors for latitude and longitude
+stations_locations$Location <- gsub(" ", "", stations_locations$Location, fixed = TRUE)
+stations_locations$Location <- str_replace_all(stations_locations$Location, pattern = '\\(|\\)', replacement = '')
+#stations_locations$Location <- str_split(str_replace_all(stations_locations$Location, pattern = '\\(|\\)', replacement = '') , pattern = ',')
+stations_locations <- stations_locations %>% 
+  separate(Location, sep=',', into=c("latitude","longitude"))
+
+stations_locations$latitude <- as.numeric(stations_locations$latitude)
+stations_locations$longitude <- as.numeric(stations_locations$longitude)
+
+
+stations_locations %>% 
+  head(n=20)
+
+View(stations_locations)
+
+
+# Preview the map here:
+gmap(lat = 41.857908, lng = -87.669147, zoom = 11, width = 700, height = 600)
+
+# The real thing (with data plotted):
+gmap(lat = 41.857908, lng = -87.669147, zoom = 11, width = 700, height = 600) %>%
+  ly_points(longitude, latitude, data = stations_locations, alpha = 0.8, col = "red",
+            hover = STATION_DESCRIPTIVE_NAME)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
