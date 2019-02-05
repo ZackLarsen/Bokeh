@@ -2,10 +2,12 @@
 # Boxplot example with Bokeh
 
 from bokeh.plotting import figure, show, output_file, reset_output
-
+import os
+import pandas as pd
+import numpy as np
 
 os.getcwd()
-os.chdir('/Users/zacklarsen/Desktop/Projects/Dataviz/Python')
+os.chdir('/Users/zacklarsen/Zack_Master/Projects/Dataviz/Python/')
 os.listdir()
 
 snowmobiles = pd.read_excel('hodnrtempboatssnowmastercurrentexcelfiles20181001snowactiveregistrations.xlsx')
